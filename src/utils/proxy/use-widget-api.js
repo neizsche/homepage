@@ -15,3 +15,14 @@ export default function useWidgetAPI(widget, ...options) {
   // make the data error the top-level error
   return { data, error: data?.error ?? error, mutate };
 }
+
+export async function handlePOSTAction(widget, action) {
+  const url = formatProxyUrl(widget, action);
+  try {
+    const res = await fetch(url, { method: "POST" });
+    if (!res.ok) return false;
+    return true;
+  } catch (error) {
+    return false;
+  }
+}
