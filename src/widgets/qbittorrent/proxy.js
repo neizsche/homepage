@@ -36,7 +36,14 @@ export default async function qbittorrentProxyHandler(req, res) {
   }
 
   const url = new URL(formatApiCall("{url}/api/v2/{endpoint}", { endpoint, ...widget }));
-  const params = { method: "GET", headers: {} };
+  const params = {
+    method: req.method?.toUpperCase() ?? "GET",
+    headers: {},
+    body: null,
+    ...(req.extraHeaders && { headers: { ...req.extraHeaders } }),
+    ...(req.body && { body: req.body }),
+  };
+
 
   let [status, contentType, data] = await httpProxy(url, params);
   if (status === 403) {

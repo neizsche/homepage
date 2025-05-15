@@ -1,16 +1,49 @@
 import Block from "components/services/widget/block";
 import Container from "components/services/widget/container";
 import { useTranslation } from "next-i18next";
+import { useCallback, useEffect, useState } from "react";
 
 import QueueEntry from "../../components/widgets/queue/queueEntry";
 
-import useWidgetAPI from "utils/proxy/use-widget-api";
+import useWidgetAPI, { handlePOSTAction } from "utils/proxy/use-widget-api";
+import ToggleAction from "components/services/widget/toggleAction";
+import ButtonAction from "components/services/widget/buttonAction";
 
 export default function Component({ service }) {
   const { t } = useTranslation();
   const { widget } = service;
 
   const { data: torrentData, error: torrentError } = useWidgetAPI(widget, "torrents");
+  const { data: speedToggleStatus, mutate: fetchSpeedToggleStatus } = useWidgetAPI(widget, "speedLimitsMode", {}, { refreshInterval: 200 });
+  const [isSpeedToggleEnabled, setSpeedToggle] = useState(false);
+  useEffect(() => {
+    if (speedToggleStatus !== undefined) {
+      setSpeedToggle(speedToggleStatus === 0);
+    }
+  }, [speedToggleStatus]);
+  
+  const useApiAction = (widget, actionName) => {
+    return useCallback(async () => {
+      try { return await handlePOSTAction(widget, actionName); } 
+      catch (error) { return false; }
+    }, [widget, actionName, handlePOSTAction]);
+  };
+
+  const pauseAllTorrents = useApiAction(widget, "pauseAll");
+  const resumeAllTorrents = useApiAction(widget, "resumeAll");
+  const shutdown = useApiAction(widget, "shutdown");
+
+  const toggleSpeedLimit = useCallback(async () => {
+    const previousValue = isSpeedToggleEnabled;
+    setSpeedToggle(!previousValue);
+    try {
+      const success = useApiAction(widget, "toggleSpeedLimits");
+      if (!success) setSpeedToggle(previousValue);
+      fetchSpeedToggleStatus();
+    } catch (error) {
+      setSpeedToggle(previousValue);
+    }
+  }, [widget, isSpeedToggleEnabled, fetchSpeedToggleStatus, toggleSpeedLimit]);
 
   if (torrentError) {
     return <Container service={service} error={torrentError} />;
@@ -64,6 +97,31 @@ export default function Component({ service }) {
             key={`${queueEntry.name}-${queueEntry.amount_left}`}
           />
         ))}
+      {widget?.enableActions && (
+        <>
+          <ToggleAction
+            checked={isSpeedToggleEnabled}
+            label="Toggle Speed Limits"
+            onChange={toggleSpeedLimit}
+          />
+          <ButtonAction
+            label="pause all torrents"
+            onClick={pauseAllTorrents}
+            ratelimitter={200}
+          />
+          <ButtonAction
+            label="resume all torrents"
+            onClick={resumeAllTorrents}
+            ratelimitter={200}
+          />
+          <ButtonAction
+            label="shutdown"
+            onClick={shutdown}
+            ratelimitter={200}
+            confirmation
+          />
+        </>
+      )}
     </>
   );
 }
