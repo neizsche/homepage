@@ -284,6 +284,7 @@ export function cleanServiceGroups(groups) {
 
           // deluge, qbittorrent
           enableLeechProgress,
+          enableActions,
 
           // diskstation
           volume,
@@ -574,6 +575,9 @@ export function cleanServiceGroups(groups) {
         }
         if (type === "jellystat") {
           if (days !== undefined) widget.days = parseInt(days, 10);
+        }
+        if (["emby"].includes(type)) {
+          if (enableActions !== undefined) widget.enableActions = enableActions;
         }
         return widget;
       });

@@ -5,7 +5,9 @@ import { BsCpu, BsFillCpuFill, BsFillPlayFill, BsPauseFill, BsVolumeMuteFill } f
 import { MdOutlineSmartDisplay } from "react-icons/md";
 
 import { getURLSearchParams } from "utils/proxy/api-helpers";
-import useWidgetAPI from "utils/proxy/use-widget-api";
+import useWidgetAPI, { handlePOSTAction } from "utils/proxy/use-widget-api";
+import ButtonAction from "components/services/widget/buttonAction";
+import { useCallback } from "react";
 
 function ticksToTime(ticks) {
   const milliseconds = ticks / 10000;
@@ -232,6 +234,25 @@ export default function Component({ service }) {
     });
   }
 
+  const useApiAction = (widget, actionName) => {
+    return useCallback(async () => {
+      try { return await handlePOSTAction(widget, actionName); } 
+      catch (error) { return false; }
+    }, [widget, actionName, handlePOSTAction]);
+  };
+
+  const refreshLibrary = useApiAction(widget, "RefreshLibrary");
+  const shutdown = useApiAction(widget, "Shutdown");
+  const restart = useApiAction(widget, "Restart");
+  
+  const renderActionComponent = widget?.enableActions && (
+    <>
+      <ButtonAction label="Refresh Library" onClick={refreshLibrary} ratelimitter={2000} />
+      <ButtonAction label="ShutDown" onClick={shutdown} ratelimitter={2000} confirmation/>
+      <ButtonAction label="Restart" onClick={restart} ratelimitter={2000} confirmation/>
+    </>
+  );
+
   if (sessionsError || countError) {
     return <Container service={service} error={sessionsError ?? countError} />;
   }
@@ -258,6 +279,7 @@ export default function Component({ service }) {
             )}
           </div>
         )}
+        {renderActionComponent}
       </>
     );
   }
@@ -289,6 +311,7 @@ export default function Component({ service }) {
               </div>
             )}
           </div>
+          {renderActionComponent}
         </>
       );
     }
@@ -306,6 +329,7 @@ export default function Component({ service }) {
               showEpisodeNumber={showEpisodeNumber}
             />
           </div>
+          {renderActionComponent}
         </>
       );
     }
@@ -324,6 +348,7 @@ export default function Component({ service }) {
             />
           ))}
         </div>
+        {renderActionComponent}
       </>
     );
   }

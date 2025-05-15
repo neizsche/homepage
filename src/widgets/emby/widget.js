@@ -21,6 +21,18 @@ const widget = {
       endpoint: "Sessions/{sessionId}/Playing/Pause",
       segments: ["sessionId"],
     },
+    RefreshLibrary: {
+      endpoint: "Library/Refresh",
+      method: "POST",
+    },
+    Shutdown: {
+      endpoint: "System/Shutdown",
+      method: "POST",
+    },
+    Restart: {
+      endpoint: "System/Restart",
+      method: "POST",
+    },
   },
 };
 
