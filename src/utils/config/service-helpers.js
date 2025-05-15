@@ -576,7 +576,7 @@ export function cleanServiceGroups(groups) {
         if (type === "jellystat") {
           if (days !== undefined) widget.days = parseInt(days, 10);
         }
-        if (["emby", "qbittorrent"].includes(type)) {
+        if (["jellyfin", "qbittorrent"].includes(type)) {
           if (enableActions !== undefined) widget.enableActions = enableActions;
         }
         return widget;

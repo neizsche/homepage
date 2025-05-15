@@ -43,7 +43,7 @@ export default function Component({ service }) {
     } catch (error) {
       setSpeedToggle(previousValue);
     }
-  }, [widget, isSpeedToggleEnabled, fetchSpeedToggleStatus, toggleSpeedLimit]);
+  }, [widget, isSpeedToggleEnabled, fetchSpeedToggleStatus]);
 
   if (torrentError) {
     return <Container service={service} error={torrentError} />;
