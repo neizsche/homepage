@@ -66,6 +66,30 @@ my-docker:
   port: 2375
 ```
 
+Use `protocol: https` if you’re connecting through a reverse proxy (e.g., Traefik) that serves the Docker API over HTTPS:
+
+```yaml
+my-docker:
+  host: dockerproxy
+  port: 443
+  protocol: https
+```
+
+!!! note
+
+    Note: This does not require TLS certificates if the proxy handles encryption. Do not use `protocol: https` unless you’re sure the target host supports HTTPS.
+
+You can also include `headers` for the connection, for example, if you are using a reverse proxy that requires authentication:
+
+```yaml
+my-docker:
+  host: dockerproxy
+  port: 443
+  protocol: https
+  headers:
+    Authorization: Basic <base64-encoded-credentials>
+```
+
 ## Using Socket Directly
 
 If you'd rather use the socket directly, first make sure that you're passing the local socket into the Docker container.
